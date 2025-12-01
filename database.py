@@ -58,22 +58,38 @@ def handle_error(exception_context):
             # These are transient/connection errors - mark for retry
             exception_context.is_disconnect = True
 
-# Test connection on startup
-try:
-    logger.info("Testing database connection...")
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT 1"))
-        logger.info("✅ Database connection successful!")
-except Exception as e:
-    logger.error(f"❌ Database connection FAILED: {e}")
-    logger.error(f"Error type: {type(e).__name__}")
-    logger.error(f"Error details: {str(e)}")
-    logger.error("Please check:")
-    logger.error("  1. Azure SQL firewall allows Cloud Run IP addresses")
-    logger.error("  2. Database credentials are correct")
-    logger.error("  3. Network connectivity to fastapidev.database.windows.net:1433")
-    # Don't raise - allow app to start but log the error
-
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
+
+
+def test_database_connection():
+    """
+    Test database connection. Call this after app startup, not at import time.
+    Returns True if connection successful, False otherwise.
+    """
+    try:
+        logger.info("Testing database connection...")
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            logger.info("Database connection successful!")
+            return True
+    except Exception as e:
+        logger.error(f"Database connection FAILED: {e}")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error("Please check:")
+        logger.error("  1. Azure SQL firewall allows Databricks Apps IP addresses")
+        logger.error("  2. Database credentials are correct")
+        logger.error("  3. Network connectivity to fastapidev.database.windows.net:1433")
+        return False
+
+
+def get_db():
+    """
+    Dependency for FastAPI routes to get database session.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 

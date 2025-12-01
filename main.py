@@ -3,13 +3,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from pathlib import Path
+from contextlib import asynccontextmanager
+import logging
 
 # Load environment variables
 load_dotenv()
 
 import models
 import uvicorn
-from database import engine,SessionLocal
 from routers import (auth, todos, admin, users, lead, site, contact, prospect_type,
                       site_infra, infra, infra_unit, amenity, lead_history, action_item, targets,
                      home_api, search, developer, user_target_allotment, Follow_Ups, Account,
@@ -29,13 +30,62 @@ import os
 # Import scheduler for lead scoring (OPTIMIZED VERSION for <10s performance)
 from scheduler.score_updater_optimized import start_scheduler, shutdown_scheduler
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
-# templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """
+    Modern FastAPI lifespan context manager.
+    Handles startup and shutdown events properly for Databricks Apps.
+
+    CRITICAL FOR DATABRICKS APPS:
+    - App must respond to health checks within seconds of startup
+    - Database connection test is non-blocking (warnings only)
+    - Scheduler initial run is delayed by 60s to not block startup
+    """
+    # ========== STARTUP ==========
+    logger.info("=" * 60)
+    logger.info("Starting CRM Backend Application...")
+    logger.info("=" * 60)
+
+    # Test database connection (non-blocking - warnings only)
+    try:
+        from database import engine
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("Database connection: OK")
+    except Exception as e:
+        logger.warning(f"Database connection test failed: {e}")
+        logger.warning("App will start anyway - database may connect later")
+
+    # Start scheduler with delayed initial run (60s delay to allow app to start)
+    try:
+        start_scheduler(delay_initial_run=60)
+        logger.info("Background scheduler: Started (first run in 60s)")
+    except Exception as e:
+        logger.warning(f"Scheduler failed to start: {e}")
+        logger.warning("App will continue without scheduler")
+
+    logger.info("Application startup complete - ready to serve requests!")
+
+    yield  # Application runs here
+
+    # ========== SHUTDOWN ==========
+    logger.info("Shutting down CRM Backend Application...")
+    try:
+        shutdown_scheduler()
+        logger.info("Scheduler shutdown: OK")
+    except Exception as e:
+        logger.warning(f"Scheduler shutdown error: {e}")
+
+    logger.info("Application shutdown complete!")
 
 
-
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 
@@ -53,23 +103,40 @@ app.add_middleware(
 # models.Base.metadata.create_all(bind=engine)
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Start background scheduler when app starts"""
-    start_scheduler()
-    print("✅ Background score update scheduler started - runs every 30 minutes")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Gracefully shutdown scheduler"""
-    print("🛑 Shutting down background scheduler")
-    shutdown_scheduler()
 
 
 @app.get("/healthy")
 def healthy_check():
-    return {'status' : 'Healthy'}
+    """
+    Health check endpoint for Databricks Apps.
+    Returns immediately to prevent 502 errors during startup.
+    """
+    return {'status': 'Healthy'}
+
+
+@app.get("/health")
+def health_check_detailed():
+    """
+    Detailed health check with database status.
+    Use /healthy for quick checks, /health for detailed status.
+    """
+    from database import test_database_connection
+    from scheduler.score_updater_optimized import get_scheduler_status
+
+    db_ok = False
+    try:
+        db_ok = test_database_connection()
+    except Exception:
+        pass
+
+    scheduler_info = get_scheduler_status()
+
+    return {
+        'status': 'Healthy' if db_ok else 'Degraded',
+        'database': 'Connected' if db_ok else 'Disconnected',
+        'scheduler': scheduler_info.get('message', 'Unknown'),
+        'version': '1.0.0'
+    }
 
 
 # app.include_router(auth.router)

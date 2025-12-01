@@ -1,29 +1,46 @@
-fastapi
+# Core Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# Database - pymssql is critical for Databricks Apps (no ODBC driver needed)
 pymssql>=2.2.8
-redis
-types-redis
-uvicorn
-pydantic
-python-multipart
-python-jose[cryptography]
+sqlalchemy>=2.0.0
+
+# Authentication & Security
+python-jose[cryptography]>=3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
-sqlalchemy
-python-multipart
-pytz
-pydantic[email]
-pandas
-numpy
-apscheduler
-twilio
-openpyxl
+python-multipart>=0.0.6
+
+# Data Validation
+pydantic[email]>=2.0.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0
+
+# Background Tasks
+apscheduler>=3.10.0
+
+# External Integrations
+twilio>=8.0.0
 groq>=0.4.1
 langchain>=0.1.0
 langchain-groq>=0.0.1
+
+# Utilities
 python-dotenv>=1.0.0
+pytz>=2024.1
 phonenumbers==8.13.27
+aiofiles>=23.0.0
+
+# Image Processing (optional - comment out if not needed)
 pdf2image==1.16.3
-Pillow==10.1.0
-aiofiles
+Pillow>=10.0.0
+
+# Redis (optional - uncomment if using caching)
+# redis>=5.0.0
+# types-redis>=4.6.0
 
 

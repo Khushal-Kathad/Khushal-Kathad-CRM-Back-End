@@ -309,7 +309,14 @@ def update_all_lead_scores():
 # Scheduler functions (same as original)
 _scheduler = None
 
-def start_scheduler():
+def start_scheduler(delay_initial_run: int = 60):
+    """
+    Start the background scheduler for lead score updates.
+
+    Args:
+        delay_initial_run: Seconds to wait before first run (default 60s).
+                          This prevents blocking Databricks Apps startup.
+    """
     global _scheduler
     if _scheduler is not None:
         logger.warning("Scheduler already running")
@@ -324,16 +331,25 @@ def start_scheduler():
         name='Update all lead scores',
         replace_existing=True
     )
-    _scheduler.add_job(
-        update_all_lead_scores,
-        'date',
-        run_date=datetime.now(),
-        id='update_lead_scores_startup',
-        name='Update lead scores on startup'
-    )
+
+    # CRITICAL FIX: Delay initial run to prevent blocking app startup
+    # Databricks Apps needs the app to respond to health checks quickly
+    if delay_initial_run > 0:
+        initial_run_time = datetime.now() + timedelta(seconds=delay_initial_run)
+        _scheduler.add_job(
+            update_all_lead_scores,
+            'date',
+            run_date=initial_run_time,
+            id='update_lead_scores_startup',
+            name='Update lead scores on startup (delayed)'
+        )
+        print(f"[OK] OPTIMIZED score update scheduler started - first run in {delay_initial_run}s, then every 30 minutes")
+        logger.info(f"OPTIMIZED score update scheduler started - first run delayed by {delay_initial_run}s")
+    else:
+        print("[OK] OPTIMIZED score update scheduler started - runs every 30 minutes")
+        logger.info("OPTIMIZED score update scheduler started")
+
     _scheduler.start()
-    print("[OK] OPTIMIZED score update scheduler started - runs every 30 minutes")
-    logger.info("OPTIMIZED score update scheduler started")
     return _scheduler
 
 def get_scheduler():
