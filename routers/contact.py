@@ -13,7 +13,7 @@ from schemas.schemas import ContactRequest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 
-import redis
+# import redis  # Commented out - not currently used
 import json
 import time
 

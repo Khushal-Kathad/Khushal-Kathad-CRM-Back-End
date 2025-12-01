@@ -21,7 +21,7 @@ from routers.security_utils import get_user_site_ids
 import time
 import logging
 
-import redis
+# import redis  # Commented out - not currently used
 
 # Configure detailed logging for performance debugging
 logging.basicConfig(level=logging.INFO)
