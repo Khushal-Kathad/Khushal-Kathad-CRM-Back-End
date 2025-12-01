@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[3425],{53425:e=>{e.exports=JSON.parse('{"demo":{"lang":"Arabic","description":"نقطة البداية لمشروعك التالي مستندة إلى MUI. التخصيص السهل يساعدك على بناء التطبيقات بشكل أسرع وأفضل."}}')}}]);

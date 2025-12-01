@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4451],{14451:e=>{e.exports=JSON.parse('{"demo":{"lang":"Chinese","description":"您的下一个项目的起点基于 MUI。简单的定制可帮助您更快、更好地构建应用程序。"}}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1704],{71704:e=>{e.exports=JSON.parse('{"app":"Ứng dụng","job":"C\xf4ng việc","user":"Người d\xf9ng","travel":"Du lịch","invoice":"H\xf3a đơn","blog":{"title":"Blog","caption":"Ph\xedm tắt t\xf9y chỉnh."},"subheader":"Ti\xeau đề phụ"}')}}]);

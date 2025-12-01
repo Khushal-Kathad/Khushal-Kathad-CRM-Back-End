@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9447],{39447:e=>{e.exports=JSON.parse('{"app":"Application","job":"Emploi","user":"Utilisateur","travel":"Voyage","invoice":"Facture","blog":{"title":"Blog","caption":"Raccourcis clavier personnalis\xe9s."},"subheader":"Sous-titre"}')}}]);

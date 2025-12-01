@@ -1,0 +1,140 @@
+trigger:
+  branches:
+    include:
+      - deployment
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  PROJECT_ID: aerial-utility-231610  # Replace with your GCP project ID
+  SERVICE_NAME: azure-devops-deployer     # Cloud Run service name
+  REGION: us-central1              # Change to your preferred region
+
+steps:
+
+# Install Docker Compose
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y docker-compose
+  displayName: 'Install Docker Compose'
+
+# Build Docker Image using Docker Compose and Tag it
+- script: |
+    docker-compose -f docker-compose.yaml build
+    docker tag s_web us-central1-docker.pkg.dev/$(PROJECT_ID)/cloud-run-source-deploy/$(SERVICE_NAME):latest
+  displayName: 'Build and Tag Docker Image using Docker Compose'
+
+
+# Authenticate with GCP
+# - script: |
+#     echo $(GCP_SERVICE_ACCOUNT_KEY) 
+#     echo $(GCP_SERVICE_ACCOUNT_KEY) > key.json
+#     cat key.json 
+#     gcloud auth activate-service-account --key-file=key.json
+#     gcloud config set project $(PROJECT_ID)
+#     gcloud auth configure-docker us-central1-docker.pkg.dev
+#   displayName: 'Authenticate with GCP'
+#   env:
+#     GCP_SERVICE_ACCOUNT_KEY: $(GCP_SERVICE_ACCOUNT_KEY)
+
+# Authenticate with GCP using raw service account fields
+# - script: |
+#     # Set the project and credentials from the raw JSON fields
+#     export GOOGLE_CLOUD_PROJECT="aerial-utility-231610"
+#     export GOOGLE_CLIENT_EMAIL="azure-devops-deployer@aerial-utility-231610.iam.gserviceaccount.com"
+#     export GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDC8SdXjcm2Wgic\nNU5/sxa/MHprzgAZf7FJcQ67ZQJhLn9ezFPAMi2JsPcB69GKofk/TVJCYF66LqZb\nF7RobJwY6Sp7P6b45O98pkYtc1ByYRNGDT2yje/yTPvA1OkD+Lqjrvm8eDPUvgMN\nkXKLmGjL/QdTMReRpQIuGAk31h0IiKLykbynGi0XKnttFuRsa64G3kCCgBtB56v6\n8tE78jhNiuoXfrKHWkk3eUu53uw7BPZ7dXhXYVOintGbQgiQS+WZbRlQlnlwQ43K\nm/XoMq2yDwoS69AxsBPfr/+iL7Gzwj37QngAGklQZKXIcxM8+hpHGuz3Lx//zYju\nsqLOq/O5AgMBAAECggEAHd2lWeASpbnQdOIj1yOgWgU61DZYxI9QIYDNMX+NqEbf\n462pLRpi6KPwi95NmZAsJ/sYHaw3Bw4rlWwhyxfMqHJcfEppsdsdJ7svqDnw+r0N\nn19a8vaU6snJjibwVhfuvDIL98hwpGjB/fupEWL1tz7aNvAf/MPLfDVZgDDw/MPx\nfucQQU7de9EQTPvc52UYUsKPGfFL9xN3fU+jul/1+H6WXSLDqzrP7MBRhqHEQrY0\nBOqGoTI66CZSxLwKOm9nmlaHMBKajeAiC8wU2NhCvfw0qx515wTKf+Qsgm1oB02d\ncqJ5S4+stHeXKK+CO5MyQUqMoTieEwxA7zwbfVksSQKBgQD0EY7FFMf2wYWZlwaT\nhjZDPFuILV4V8ji73g5/KEbxJ4LtRyLlBRbrd1ToTk4Kuc2l5gWYM4IomhzEuUdb\nlq0nnv6fPqCPD68ep6N1YR7NZ+ij/ymnuksbOqhneYXBqYPiQqtnZYg5Os3Sh3TA\nMY1Jqm1+3GWAjbsC8QzKPQe9FQKBgQDMeMrLMqD6G0sn+fwGAj4Kz/HGTgJX6UPC\nv0B2/uju13ytTzOctU7fwb4DCzTQnRxFBJbBxJGKaCc1ILtHbBWU2IfBlgAzQp3L\nHiyQDppRdqFg2tVrmY4cGyBKXZ9om9bMAJhKXaJV8RiGHoSAyJzXov4uJuRpkRfx\nIN7Z2EntFQKBgQDg1VvDyYT7lwJPnoR8WeKaxXs8Uy6c4OnKhqCsGppfhJpjomhO\nuQWIHAGnjprt3oPHE8KLlseMR4vA3T0S7hbMrPa6E6MsprIXdy5o7vLFHbd9e40P\n6dlOWBbSW2wQHuxS/j+PnESFE9qO2iF++ybAebMsbjNC3U0tRIkXtGjwkQKBgGo9\niQEzeTj63X4UAcMNfzcW/MTQ257Z8P9LaC9sG5OeG4XhVSvjeOwCOrxSIksSlxG1\nZK+hdw23OEf+jdB6dGw2ZbNMQSZhQqO7NeRT8hLJ1OgCTEnwK0qnPYvmQWGVN3Ig\nDQD2zdZhwyBM0wQnOHdClVddlejUHuCG98OxAhhRAoGBAJ8+f6uZc24YSQOw1qNw\njqOujXMd89vTInJxWvw83k38PFTHa8M/BIXvSdIiQ7CZpCDqSG6oiYEFI/s8gVVx\n+CIFrJf8jxryNySKKdAG3mJUdA9sH9jcZF1FEiRbCEFgro12wPZRP1zs6bBokzPp\nuLiJUo5YMfsmgUw0rtQJJp4s\n-----END PRIVATE KEY-----\n"
+#     export GOOGLE_PRIVATE_KEY_ID="704227068ebf895065370a35cf8f60a19d40ba28"
+#     export GOOGLE_AUTH_URI="https://accounts.google.com/o/oauth2/auth"
+#     export GOOGLE_TOKEN_URI="https://oauth2.googleapis.com/token"
+#     export GOOGLE_AUTH_PROVIDER_X509_CERT_URL="https://www.googleapis.com/oauth2/v1/certs"
+#     export GOOGLE_CLIENT_X509_CERT_URL="https://www.googleapis.com/robot/v1/metadata/x509/azure-devops-deployer%40aerial-utility-231610.iam.gserviceaccount.com"
+#     export GOOGLE_UNIVERSE_DOMAIN="googleapis.com"
+    
+#     # Create a service account credentials JSON object on the fly
+#     export GOOGLE_APPLICATION_CREDENTIALS_JSON=$(cat <<EOF
+# {
+#   "type": "service_account",
+#   "project_id": "$GOOGLE_CLOUD_PROJECT",
+#   "private_key_id": "$GOOGLE_PRIVATE_KEY_ID",
+#   "private_key": "$GOOGLE_PRIVATE_KEY",
+#   "client_email": "$GOOGLE_CLIENT_EMAIL",
+#   "client_id": "$GOOGLE_CLIENT_ID",
+#   "auth_uri": "$GOOGLE_AUTH_URI",
+#   "token_uri": "$GOOGLE_TOKEN_URI",
+#   "auth_provider_x509_cert_url": "$GOOGLE_AUTH_PROVIDER_X509_CERT_URL",
+#   "client_x509_cert_url": "$GOOGLE_CLIENT_X509_CERT_URL",
+#   "universe_domain": "$GOOGLE_UNIVERSE_DOMAIN"
+# }
+# EOF
+#     )
+
+#     # Save this temporary credentials JSON to a file
+#     echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/service-account.json
+
+#     # Authenticate with GCP using the generated service account JSON
+#     gcloud auth activate-service-account --key-file=/tmp/service-account.json
+#     gcloud config set project $GOOGLE_CLOUD_PROJECT
+#     gcloud auth configure-docker us-central1-docker.pkg.dev
+#   displayName: 'Authenticate with GCP using raw service account fields'
+
+
+
+
+# Authenticate with GCP using raw service account fields
+# - task: DownloadSecureFile@1
+#   name: gcpJson
+#   displayName: 'Download GCP Key file'
+#   inputs:
+#     secureFile: 'aerial-utility-231610-704227068ebf.json'
+
+- script: |
+
+    GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
+    GOOGLE_CLIENT_EMAIL=$(client_email)
+    GOOGLE_PRIVATE_KEY=$(private_key)
+    GOOGLE_PRIVATE_KEY_ID=$(private_key_id)
+    GOOGLE_AUTH_URI=$(auth_uri)
+    GOOGLE_TOKEN_URI=$(token_uri)
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL=$(auth_provider_x509_cert_url)
+    GOOGLE_CLIENT_X509_CERT_URL=$(client_x509_cert_url)
+    GOOGLE_UNIVERSE_DOMAIN=$(universe_domain)
+
+    GOOGLE_APPLICATION_CREDENTIALS_JSON="{\"type\": \"service_account\", \"project_id\": \"$GOOGLE_CLOUD_PROJECT\", \"private_key_id\": \"$GOOGLE_PRIVATE_KEY_ID\", \"private_key\": \"$GOOGLE_PRIVATE_KEY\", \"client_email\": \"$GOOGLE_CLIENT_EMAIL\", \"client_id\": \"$GOOGLE_CLIENT_ID\", \"auth_uri\": \"$GOOGLE_AUTH_URI\", \"token_uri\": \"$GOOGLE_TOKEN_URI\", \"auth_provider_x509_cert_url\": \"$GOOGLE_AUTH_PROVIDER_X509_CERT_URL\", \"client_x509_cert_url\": \"$GOOGLE_CLIENT_X509_CERT_URL\",  \"universe_domain\": \"$GOOGLE_UNIVERSE_DOMAIN\"}"
+
+
+    echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/service-account.json
+
+    gcloud auth activate-service-account --key-file=/tmp/service-account.json
+    gcloud config set project $GOOGLE_CLOUD_PROJECT
+    echo '{"credHelpers": {"us-central1-docker.pkg.dev": "gcloud"}}' > /home/vsts/.docker/config.json
+    gcloud auth configure-docker us-central1-docker.pkg.dev
+  displayName: 'Authenticate with GCP using raw service account fields'
+
+
+
+
+
+
+
+
+
+
+
+# Push Docker Image to GCP Artifact Registry
+- script: |
+    docker push us-central1-docker.pkg.dev/$(PROJECT_ID)/cloud-run-source-deploy/$(SERVICE_NAME):latest
+  displayName: 'Push Docker Image to GCP Artifact Registry'
+
+
+# Deploy to Cloud Run
+- script: |
+    gcloud run deploy $(SERVICE_NAME) \
+      --image=us-central1-docker.pkg.dev/$(PROJECT_ID)/cloud-run-source-deploy/$(SERVICE_NAME) \
+      --region=$(REGION) \
+      --platform=managed \
+      --allow-unauthenticated \
+      --set-env-vars="GROQ_API_KEY=$(GROQ_API_KEY),TWILIO_ACCOUNT_SID=$(TWILIO_ACCOUNT_SID),TWILIO_AUTH_TOKEN=$(TWILIO_AUTH_TOKEN),TWILIO_WHATSAPP_NUMBER=$(TWILIO_WHATSAPP_NUMBER)"
+  displayName: 'Deploy to Cloud Run'
+
+

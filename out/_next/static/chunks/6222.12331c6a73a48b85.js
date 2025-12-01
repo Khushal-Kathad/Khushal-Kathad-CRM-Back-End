@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[6222],{16222:e=>{e.exports=JSON.parse('{"app":"تطبيق","job":"وظيفة","user":"مستخدم","travel":"السفر","invoice":"فاتورة","blog":{"title":"مدونة","caption":"اختصارات لوحة المفاتيح المخصصة."},"subheader":"العنوان الفرعي"}')}}]);

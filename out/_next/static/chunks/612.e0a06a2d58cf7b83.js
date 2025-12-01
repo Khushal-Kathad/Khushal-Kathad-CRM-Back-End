@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[612],{80612:e=>{e.exports=JSON.parse('{"demo":{"lang":"France","description":"Le point de d\xe9part pour votre prochain projet est bas\xe9 sur MUI. La personnalisation facile vous aide \xe0 construire des applications plus rapidement et mieux."}}')}}]);

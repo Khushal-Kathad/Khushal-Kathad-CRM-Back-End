@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9016],{86635:n=>{n.exports=JSON.parse('{"demo":{"lang":"Vietnamese","description":"Điểm bắt đầu cho dự \xe1n tiếp theo của bạn dựa tr\xean MUI. Việc t\xf9y chỉnh dễ d\xe0ng gi\xfap bạn x\xe2y dựng ứng dụng nhanh hơn v\xe0 tốt hơn."}}')}}]);
